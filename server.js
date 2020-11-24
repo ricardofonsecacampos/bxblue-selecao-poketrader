@@ -10,6 +10,8 @@ let app = http.createServer((req, res) => {
     res.end('Servidor NodeJS do PokeTrader!\n');
 });
 
-// Start the server on port 80
-app.listen(80, '127.0.0.1');
-console.log('Node server running on port 80');
+// Start the server on port Heroku indicates
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '127.0.0.1');
+console.log('Node server running on port ' + PORT);
