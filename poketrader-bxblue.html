@@ -1,0 +1,249 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Pokemon Trader</title>
+	<style>
+		body {	
+			font-family: Arial;
+			font-size: 16px;
+			margin: 0;
+		}
+		
+		.title {
+			text-align: center;
+			padding: 16px;
+		}
+		
+		.pokemon-list {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 50px 1fr 1fr 1fr 1fr 1fr 1fr;
+			max-width: 800px;
+			margin: auto;
+		}
+		
+		.jogador {
+			margin: auto;
+			display: grid;
+			grid-template-columns: 1fr;
+			max-width: 800px;
+			text-align: center;
+			padding-top: 10px;
+		}
+		
+		.pokemon {
+			border: 1px solid #333;
+			padding: 10px;
+			background: #f5f5f5;
+			text-align: center;
+		}
+		
+		img {
+			width: 100px;
+		}
+		
+		.button {
+			background-color: #4caf50;
+			border: none;
+			color: white;
+			padding: 15px 32px;
+			text-align: center;
+			text-decoration: none;
+			
+			display: flex;
+			margin-right: auto;
+			margin-left: auto;
+			margin-bottom: 16px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+			
+	</style>
+</head>
+<body>
+	<h1 class="title">Pokemon Trader</h1>
+	
+	<div class="pokemon-list" id="listaPokemon1">
+		<div class="pokemon" id="pokemon-1">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-2">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-3">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-4">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-5">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-6">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+	</div>
+	<div class="jogador">Jogador 1 - pontos de experiência:<div id='jogador-1'>0</div>
+	</div>
+	<p></p>
+	<div class="jogador">
+		<button class='button' onclick='alert("troca confirmada")'>?</button>
+	</div>
+	<p></p>
+	<div class="jogador">Jogador 2 - pontos de experiência:<div id='jogador-2'>0</div>
+	</div>
+	<p></p>
+	<div class="pokemon-list">
+		<div class="pokemon" id="pokemon-7">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-8">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-9">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-10">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-11">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-12">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+	</div>
+	
+	<script>
+	// inicializações
+	// configuração das combos.
+	for (let i = document.getElementsByTagName('select').length - 1; i > -1; i--) {
+		let obj = document.getElementsByTagName('select')[i]
+		obj.add(new Option('(nenhum)', 0))
+		obj.onchange = function(){selecionouPokemon(this)}
+	}
+	// configuração das imagens.
+	for (let i = document.getElementsByTagName('img').length - 1; i > -1; i--) {
+		let obj = document.getElementsByTagName('img')[i]
+		obj.setAttribute('src', 'a.png')
+	}
+	
+	// guarda os pontos de experiência de cada pokemon.
+	let pontoExperiencia = [[0,0,0,0,0,0],[0,0,0,0,0,0]]
+	// recebe a diferença de pontuação de experiencia maxima para a troca ser justa.
+	let limiteJustica = 0;
+	// indicador de troca justa ou não
+	let isJusta = false;
+	
+	function somaArray(total, item) {
+		return total + item
+	}
+	
+	// monta todos os 'select' da tela recuperando o json da pokeapi que lista os pokemons.
+	// cada pokemon é selecionado por um combobox.
+	function popularCombos() {
+		fetch('https://pokeapi.co/api/v2/pokemon?limit=150')
+		.then(function (response) {
+			response.json()
+			.then(function (pokemons) {				
+				for (let i = pokemons.results.length-1; i > -1; i--) {
+					let nome = pokemons.results[i].name
+					let id = pokemons.results[i].url.replace(/.+pokemon\//,'').replace(/\D/,'')
+					
+					for (let j = document.getElementsByTagName('select').length-1; j > -1; j--) {
+						document.getElementsByTagName('select')[j].add(new Option(nome, id))
+					}
+				}
+			})
+		})
+	}
+
+	// recupera as informações de um pokemon, dado o seu ID, e atualiza suas informações com base no seu número (num).
+	function consultarPokemon(id, num) {
+		fetch('https://pokeapi.co/api/v2/pokemon/' + id)
+		.then(function (response) {
+			response.json()
+			.then(function (pokemon) {
+				//console.log(pokemon)
+				criarPokemon(pokemon, num)
+				atualizarPontuacao(pokemon.base_experience, num)
+			})
+			.catch(() => {
+				console.log('Anular pokemon ' + num)
+				criarPokemon(null, num)
+				atualizarPontuacao(0, num)
+			})
+		})
+		.catch(() => {
+			console.error('Sem acesso à pokeapi.')
+		})
+	}
+
+	// atualiza um pokemon dado o seu número (num) e o JSON com suas informações.
+	function criarPokemon(pokemon, num) {
+		// transfere os dados do json do pokemon para a tela.
+		let item = document.getElementById('pokemon-' + num)
+		let imagem = item.getElementsByTagName('img')[0]
+		imagem.setAttribute('src', pokemon == null ? 'a.png' : pokemon.sprites.front_default)
+		let nome = item.getElementsByTagName('p')[0]
+		nome.innerText = pokemon == null ? '(nenhum)' : (pokemon.name + ' - ' + pokemon.base_experience)
+	}
+
+	// atualiza os pontos armazenados, os totais, o limite de justiça e as informações na tela.
+	function atualizarPontuacao(experiencia, num) {
+		// fórmulas para ficar pontoExperiencia[0|1][0-5]
+		pontoExperiencia[Math.trunc((num-1) / 6)][Math.trunc((num-1) % 6)] = experiencia
+		
+		let soma1 = pontoExperiencia[0].reduce(somaArray, 0)
+		let soma2 = pontoExperiencia[1].reduce(somaArray, 0)
+		
+		// justiça definida como menor somatório de pontuação de experiência dos jogadores
+		// não menor que 20% do somatório dos pontos do outro jogador.
+		limiteJustica = Math.round(Math.max(soma1, soma2) * 0.2)
+		
+		isJusta = Math.min(soma1, soma2) + limiteJustica >= Math.max(soma1, soma2)
+		
+		document.getElementById('jogador-1').innerText = soma1
+		document.getElementById('jogador-2').innerText = soma2
+		
+		document.getElementsByTagName('button')[0].innerText =
+			isJusta ? 'Troca justa! Confirmar?' : 'Troca desigual, deseja mesmo confirmar?'
+	}
+
+	// listenter do 'onchange' das comboboxes.
+	function selecionouPokemon(obj) {
+		let numPokemon = obj.parentElement.id.replace(/\D/g, '')
+		let idPokemon = obj.value
+		consultarPokemon(idPokemon, numPokemon)
+	}
+	
+	popularCombos()
+	</script>
+</body>
+
+</html>
