@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000
 const server = http.createServer((req, res) => {
   let pathname = url.parse(req.url,true).pathname
   console.log('pathname = ' + pathname)
-  console.log('query = ' + url.parse(req.url,true).query)
+  console.log('query = ' + JSON.stringify(url.parse(req.url,true).query))
   console.log('search = ' + url.parse(req.url,true).search)
   
   if (pathname.indexOf('/save?') > -1) {
