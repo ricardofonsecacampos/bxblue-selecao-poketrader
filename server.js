@@ -15,7 +15,7 @@ const server = http.createServer((req, res) => {
     // gravar troca no banco.
     console.log('Save one trade ' + url.parse(req.url,true).query);
     
-  } else if (req.path.indexOf('/list') > -1) {
+  } else if (pathname.indexOf('/list') > -1) {
     // mostrar histórico.
     console.log('List trades ' + url.parse(req.url,true).search);
     
