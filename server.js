@@ -4,8 +4,8 @@ const http = require('http');
 // Create an instance of the http server to handle HTTP requests
 let app = http.createServer((req, res) => {
     res.writeHead(301, {
-        Location: "http" + (req.socket.encrypted ? "s" : "") + "://" +
-        req.headers.host + "/poketrader-bxblue.html"
+        Location: "http" + //(req.socket.encrypted ? "s" : "") +
+            "://" + req.headers.host + "/poketrader-bxblue.html"
     });
     res.end();
 });
