@@ -138,9 +138,11 @@
 			<select></select>
 		</div>
 	</div>
+	<p></p>
 	
 	<script>
 	// inicializações
+	let imagemVazia = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAWSURBVBhXY/z//z8DGDBBKCCAsRgYAFQkAwMdz0LpAAAAAElFTkSuQmCC'
 	// configuração das combos.
 	for (let i = document.getElementsByTagName('select').length - 1; i > -1; i--) {
 		let obj = document.getElementsByTagName('select')[i]
@@ -150,7 +152,7 @@
 	// configuração das imagens.
 	for (let i = document.getElementsByTagName('img').length - 1; i > -1; i--) {
 		let obj = document.getElementsByTagName('img')[i]
-		obj.setAttribute('src', 'a.png')
+		obj.setAttribute('src', imagemVazia)
 	}
 	
 	// guarda os pontos de experiência de cada pokemon.
@@ -209,9 +211,9 @@
 		// transfere os dados do json do pokemon para a tela.
 		let item = document.getElementById('pokemon-' + num)
 		let imagem = item.getElementsByTagName('img')[0]
-		imagem.setAttribute('src', pokemon == null ? 'a.png' : pokemon.sprites.front_default)
+		imagem.setAttribute('src', pokemon == null ? imagemVazia : pokemon.sprites.front_default)
 		let nome = item.getElementsByTagName('p')[0]
-		nome.innerText = pokemon == null ? '(nenhum)' : (pokemon.name + ' - ' + pokemon.base_experience)
+		nome.innerText = pokemon == null ? '' : (pokemon.base_experience)
 	}
 
 	// atualiza os pontos armazenados, os totais, o limite de justiça e as informações na tela.
