@@ -3,11 +3,11 @@ const http = require('http');
 
 // Create an instance of the http server to handle HTTP requests
 let app = http.createServer((req, res) => {
-    // Set a response type of plain text for the response
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-
-    // Send back a response and end the connection
-    res.end('Servidor NodeJS do PokeTrader!\n');
+    res.writeHead(301, {
+        Location: "http" + (req.socket.encrypted ? "s" : "") + "://" +
+        req.headers.host + "/poketrader-bxblue.html"
+    });
+    res.end();
 });
 
 // Start the server on port Heroku indicates
