@@ -10,17 +10,19 @@ const PORT = process.env.PORT || 3000
 
 const server = http.createServer((req, res) => {
   let pathname = url.parse(req.url,true).pathname
+  
   console.log('pathname = ' + pathname)
   console.log('query = ' + JSON.stringify(url.parse(req.url,true).query))
-  console.log('search = ' + url.parse(req.url,true).search)
+  //console.log('search = ' + url.parse(req.url,true).search)
   
-  if (pathname.indexOf('/save?') > -1) {
+  if (pathname.indexOf('/save') > -1) {
     // gravar troca no banco.
-    console.log('Save one trade ' + url.parse(req.url,true).query)
+    console.log('Save one trade')
+    console.log('n = ' + url.parse(req.url,true).query.n)
     
   } else if (pathname.indexOf('/list') > -1) {
     // mostrar histórico.
-    console.log('List trades ' + url.parse(req.url,true).search)
+    console.log('List trades.')
     
   } else {
     // servir a página da aplicação de troca.
