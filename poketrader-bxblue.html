@@ -1,0 +1,316 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Pokemon Trader</title>
+	<!-- JQuery -->
+	<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<!-- Componentes para o banco de dados online -->
+	<script src="https://bxbluepoketrader-4fcb.restdb.io/assets/js/eventsource.min.js"></script>
+	<script src="https://bxbluepoketrader-4fcb.restdb.io/rest/_jsapi.js"></script>
+	<style>
+		body {	
+			font-family: Arial;
+			font-size: 16px;
+			margin: 0;
+		}
+		
+		.title {
+			text-align: center;
+			padding: 16px;
+		}
+		
+		.pokemon-list {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 50px 1fr 1fr 1fr 1fr 1fr 1fr;
+			max-width: 800px;
+			margin: auto;
+		}
+		
+		.jogador {
+			margin: auto;
+			display: grid;
+			grid-template-columns: 1fr;
+			max-width: 800px;
+			text-align: center;
+			padding-top: 10px;
+		}
+		
+		.pokemon {
+			border: 1px solid #777;
+			padding: 10px;
+			background: #f5f5f5;
+			text-align: center;
+		}
+		
+		img {
+			width: 100px;
+		}
+		
+		.button {
+			background-color: #4caf50;
+			border: none;
+			color: white;
+			padding: 15px 32px;
+			text-align: center;
+			text-decoration: none;
+			
+			display: flex;
+			margin-right: auto;
+			margin-left: auto;
+			margin-bottom: 16px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+		
+		.historico {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr 1fr;
+			margin: auto;
+			border: 1px solid #333;
+			padding: 5px;
+			background: #bbb;
+			text-align: left;
+			font-size: 12px;
+		}
+			
+	</style>
+</head>
+<body>
+	<h1 class="title">Pokemon Trader</h1>
+	<!-- quadro de pokemons do jogador 1 -->
+	<div class="pokemon-list">
+		<div class="pokemon" id="pokemon-1">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-2"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-3"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-4"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-5"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-6"><img src="" alt=""><p></p><select></select></div>
+	</div>
+	<!-- somatórios e botão de trade -->
+	<div class="jogador">Jogador 1 - pontos de experiência:<div id='jogador-1'>0</div></div>
+	<p></p>
+	<div class="jogador"><button class='button' onclick='realizarTrade()'>?</button></div>
+	<p></p>
+	<div class="jogador">Jogador 2 - pontos de experiência:<div id='jogador-2'>0</div></div>
+	<p></p>
+	<!-- quadro de pokemons do jogador 2 -->
+	<div class="pokemon-list">
+		<div class="pokemon" id="pokemon-7">
+			<img src="" alt="">
+			<p></p>
+			<select></select>
+		</div>
+		<div class="pokemon" id="pokemon-8"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-9"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-10"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-11"><img src="" alt=""><p></p><select></select></div>
+		<div class="pokemon" id="pokemon-12"><img src="" alt=""><p></p><select></select></div>
+	</div>
+	<br><br><br>
+	<!-- histórico -->
+	<p class="jogador"><b>Histórico</b></p>
+	<div class='historico'>
+		<div><b>Quando</b></div><div><b>Jogador 1</b></div><div><b>Jogador 2</b></div><div><b>Justo</b></div>
+	</div>
+	<p></p>
+	
+<!--TODO
+- implementar testes unitários
+- melhorar desempenho fazendo cache dos pokemons
+- evitar chamada http para pokeapi quando for limpar o pokemon
+-->
+	<script>
+	// Inicializações ---
+	
+	// valor opção desmarcada
+	const valNenhum = 0
+	// imagem em branco para embutir.
+	const imagemVazia = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAWSURBVBhXY/z//z8DGDBBKCCAsRgYAFQkAwMdz0LpAAAAAElFTkSuQmCC'
+	// pontos de experiência de cada pokemon.
+	let pontoExperiencia = [[0,0,0,0,0,0],[0,0,0,0,0,0]]
+	// diferença máxima de pontuação para que a troca seja justa.
+	let limiteJustica = 0;
+	// indicador de troca justa ou não
+	let isJusta = false;
+	// handler para operações com o banco de dados Restdb.
+	let db = new restdb("5fbdae924af3f9656800ce70")
+
+	// opção vazia das combos.
+	for (let i = document.getElementsByTagName('select').length - 1; i > -1; i--) {
+		let obj = document.getElementsByTagName('select')[i]
+		obj.add(new Option('(nenhum)', valNenhum))
+		obj.onchange = function(){selecionouPokemon(this)}
+	}
+	// imagens iniciais vazias.
+	for (let i = document.getElementsByTagName('img').length - 1; i > -1; i--) {
+		let obj = document.getElementsByTagName('img')[i]
+		obj.setAttribute('src', imagemVazia)
+	}
+	
+	// preenche as combos de seleção de pokemons recuperando o JSON da pokeapi que lista os pokemons.
+	// cada combo seleciona um dos seis pokemons de cada jogador.
+	fetch('https://pokeapi.co/api/v2/pokemon?limit=150')
+	.then(function (response) {
+		response.json()
+		.then(function (pokemons) {				
+			for (let i = pokemons.results.length-1; i > -1; i--) {
+				let nome = pokemons.results[i].name
+				let id = pokemons.results[i].url.replace(/.+pokemon\//,'').replace(/\D/,'')
+				
+				for (let j = document.getElementsByTagName('select').length-1; j > -1; j--) {
+					document.getElementsByTagName('select')[j].add(new Option(nome, id))
+				}
+			}
+		})
+	})
+
+	// Funções ---
+	
+	// recupera as informações de um pokemon, dado o seu ID, e atualiza suas informações com base no seu número (num).
+	function consultarPokemon(id, num) {
+		fetch('https://pokeapi.co/api/v2/pokemon/' + id)
+		.then(function (response) {
+			response.json()
+			.then(function (pokemon) {
+				//console.log(pokemon)
+				criarPokemon(pokemon, num)
+				atualizarPontuacao(pokemon.base_experience, num)
+			})
+			.catch(() => {
+				console.log('Anular pokemon ' + num)
+				criarPokemon(null, num)
+				atualizarPontuacao(0, num)
+			})
+		})
+		.catch(() => {
+			console.error('Sem acesso à pokeapi.')
+		})
+	}
+
+	// atualiza um pokemon dado o seu número (num) e o JSON com suas informações.
+	// transfere os dados do JSON  para o HTML.
+	// para visualizar um exemplo do JSON de um pokemon, acessar 'https://pokeapi.co/api/v2/pokemon/23'.
+	function criarPokemon(pokemon, num) {
+		let item = document.getElementById('pokemon-' + num)
+		let imagem = item.getElementsByTagName('img')[0]
+		imagem.setAttribute('src', pokemon == null ? imagemVazia : pokemon.sprites.front_default)
+		let nome = item.getElementsByTagName('p')[0]
+		nome.innerText = pokemon == null ? '' : (pokemon.base_experience)
+	}
+
+	// atualiza as variáveis dos pontos de experiência, dos totais, do limite de justiça e atualiza as informações no HTML.
+	function atualizarPontuacao(experiencia, num) {
+		// fórmulas para contemplar pontoExperiencia[0|1][0-5]
+		pontoExperiencia[Math.trunc((num-1) / 6)][Math.trunc((num-1) % 6)] = experiencia
+		
+		let soma1 = pontoExperiencia[0].reduce(somaArray, 0)
+		let soma2 = pontoExperiencia[1].reduce(somaArray, 0)
+		
+		// o trade está definido como justo se a diferença do somatório de pontuação de experiência
+		// dos jogadores não é maior que 20% do somatório dos pontos do jogador com maior experiência.
+		limiteJustica = Math.round(Math.max(soma1, soma2) * 0.2)
+		
+		isJusta = Math.min(soma1, soma2) + limiteJustica >= Math.max(soma1, soma2)
+		
+		document.getElementById('jogador-1').innerText = soma1
+		document.getElementById('jogador-2').innerText = soma2
+		
+		document.getElementsByTagName('button')[0].innerText =
+			isJusta ? 'TROCA JUSTA!' : 'Troca desigual'
+	}
+
+	// listenter do 'onchange' das comboboxes.
+	function selecionouPokemon(obj) {
+		let numPokemon = obj.parentElement.id.replace(/\D/g, '')
+		let idPokemon = obj.value
+		consultarPokemon(idPokemon, numPokemon)
+	}
+	
+	// função de callback para somar um array.
+	function somaArray(total, item) {
+		return total + item
+	}
+	
+	// listener do clique do botão de trade.
+	function realizarTrade() {
+		if (isJusta || (!isJusta && confirm('Confirma essa troca injusta?'))) {
+			salvarHistorico()
+			mostrarHistorico()
+		}
+	}
+	
+	// atualiza a lista de registros do histórico de trades.
+	// limpa a lista, traz novamente do banco e monta a lista.
+	function mostrarHistorico() {
+		let div = document.getElementsByClassName('historico')[0]
+		
+		while (div.firstChild) div.removeChild(div.firstChild)
+		utilDadoHistorico(div, "Quando")
+		utilDadoHistorico(div, "Jogador 1")
+		utilDadoHistorico(div, "Jogador 2")
+		utilDadoHistorico(div, "Justo")
+
+		// get up to 100 records and sort by creation in descending order
+		db.poketrade.find({}, {"$max": 100, "$orderby": {"_id": -1}}, function(err, result) {
+			if (!err) {				
+				for (var i in result) {
+					utilDadoHistorico(div, result[i].quando)
+					utilDadoHistorico(div, result[i].jogador1_experience + ': ' + result[i].jogador1_pokemons)
+					utilDadoHistorico(div, result[i].jogador2_experience + ': ' + result[i].jogador2_pokemons)
+					utilDadoHistorico(div, result[i].is_trade_justo)
+				}
+			} else {
+				console.log('erro ao recuperar histórico')
+			}
+		});
+	}
+	
+	// salva um trade no histórico.
+	// cada trade tem a info se foi justa, data/hora e experiencia total concatenada nos nomes dos pokemons.
+	function salvarHistorico() {
+		let nomes1 = ''
+		let nomes2 = ''
+		let combos = document.getElementsByTagName('select')
+		
+		for (var i = 0; i < 6; i++) {
+			nomes1 += (combos[i].value == valNenhum ? '' : ' ' + combos[i].selectedOptions[0].text)
+		}
+		for (var i = 6; i < 12; i++) {
+			nomes2 += (combos[i].value == valNenhum ? '' : ' ' + combos[i].selectedOptions[0].text)
+		}
+
+		var obj = new db.poketrade(
+			{jogador1_pokemons:nomes1, jogador1_experience:pontoExperiencia[0].reduce(somaArray, 0),
+			jogador2_pokemons:nomes2, jogador2_experience:pontoExperiencia[1].reduce(somaArray, 0),
+			is_trade_justo:isJusta, quando:new Date()
+			}
+		)
+		obj.save(function(err, res){
+			if (err) {
+				console.log('erro ao incluir histórico')
+			} else {
+				console.log('incluiu um')
+			}
+		})
+		/*
+		*/
+	}
+	
+	// insere um texto em um novo 'div' e o coloca dentro de um objeto.
+	function utilDadoHistorico(div, texto) {
+		let hist = document.createElement('div')
+		hist.innerText = texto
+		div.appendChild(hist)
+	}
+	
+	mostrarHistorico()
+	</script>
+</body>
+
+</html>
