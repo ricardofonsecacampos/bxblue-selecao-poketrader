@@ -244,9 +244,7 @@
 		
 		if (isJusta || (!isJusta && confirm('Confirma essa troca injusta?'))) {
 			salvarHistorico()
-			alert('Troca confirmada! Verifique o histórico.')
 			mostrarHistorico()
-			alert('Troca confirmada! Verifique o histórico.')
 		}
 	}
 	
@@ -294,11 +292,13 @@
 			is_trade_justo:isJusta, quando:new Date()
 			}
 		)
-		obj.save(function(err, res){
+		obj.save(function(err, res) {
 			if (err) {
 				console.log('erro ao incluir histórico')
+				alert('Ops, houve algum problema ao confirmar a troca. Tente novamente.')
 			} else {
 				console.log('incluiu um')
+				alert('Troca confirmada! Verifique o histórico.')
 			}
 		})
 		/*
