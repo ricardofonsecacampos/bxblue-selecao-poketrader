@@ -241,6 +241,7 @@
 	function realizarTrade() {
 		if (isJusta || (!isJusta && confirm('Confirma essa troca injusta?'))) {
 			salvarHistorico()
+			alert('Troca confirmada! Verifique o histórico.')
 			mostrarHistorico()
 		}
 	}
