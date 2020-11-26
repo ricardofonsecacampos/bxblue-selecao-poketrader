@@ -7,5 +7,7 @@ A regra de justiça é bem simples, que o somatório dos pontos de experiência 
 
 Foi utilizado o banco de dados NOSQL 'restdb', que fica na nuvem e permite iterações via HTTP (get, post, delete, put). Foi criada apenas a coleção 'poketrade' nele com os registros de trocas feitas pelo aplicativo. Pela seguinte URL, é possível visualizar o JSON do histórico: 'https://bxbluepoketrader-4fcb.restdb.io/rest/poketrade'.
 
+Tentei usar MongoDB ou Redis pelo Heroku mas o primeiro só tinha opção paga e o segundo me pediu cartão de crédito.
+
 Não deu para fazer tudo na presente versão, alguns TODOs ficaram pendentes (anotados no HTML).
 #
