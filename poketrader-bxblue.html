@@ -115,9 +115,7 @@
 	<br><br><br>
 	<!-- histórico -->
 	<p class="jogador"><b>Histórico</b></p>
-	<div class='historico'>
-		<div><b>Quando</b></div><div><b>Jogador 1</b></div><div><b>Jogador 2</b></div><div><b>Justo</b></div>
-	</div>
+	<div class='historico'></div>
 	<p></p>
 	
 <!--TODO
@@ -239,10 +237,16 @@
 	
 	// listener do clique do botão de trade.
 	function realizarTrade() {
+		if (0 == (pontoExperiencia[0].reduce(somaArray, 0) + pontoExperiencia[1].reduce(somaArray, 0))) {
+			alert('Selecione ao menos um pokemon para trocar!')
+			return
+		}
+		
 		if (isJusta || (!isJusta && confirm('Confirma essa troca injusta?'))) {
 			salvarHistorico()
 			alert('Troca confirmada! Verifique o histórico.')
 			mostrarHistorico()
+			alert('Troca confirmada! Verifique o histórico.')
 		}
 	}
 	
@@ -275,16 +279,14 @@
 	// salva um trade no histórico.
 	// cada trade tem a info se foi justa, data/hora e experiencia total concatenada nos nomes dos pokemons.
 	function salvarHistorico() {
-		let nomes1 = ''
-		let nomes2 = ''
+		let nomes1 = ' '
+		let nomes2 = ' '
 		let combos = document.getElementsByTagName('select')
 		
-		for (var i = 0; i < 6; i++) {
+		for (var i = 0; i < 6; i++)
 			nomes1 += (combos[i].value == valNenhum ? '' : ' ' + combos[i].selectedOptions[0].text)
-		}
-		for (var i = 6; i < 12; i++) {
+		for (var i = 6; i < 12; i++)
 			nomes2 += (combos[i].value == valNenhum ? '' : ' ' + combos[i].selectedOptions[0].text)
-		}
 
 		var obj = new db.poketrade(
 			{jogador1_pokemons:nomes1, jogador1_experience:pontoExperiencia[0].reduce(somaArray, 0),
@@ -307,6 +309,7 @@
 	function utilDadoHistorico(div, texto) {
 		let hist = document.createElement('div')
 		hist.innerText = texto
+		hist.setAttribute('style','border-top: 1px solid #eee')
 		div.appendChild(hist)
 	}
 	
